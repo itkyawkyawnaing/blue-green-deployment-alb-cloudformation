@@ -1,0 +1,18 @@
+{
+    "Comment": "Update A Record for ALB",
+    "Changes": [
+        {
+            "Action": "UPSERT",
+            "ResourceRecordSet": {
+                "Name": "app.yourdomain.com",
+                "Type": "CNAME",
+                "TTL": 0,
+                "ResourceRecords": [
+                    {
+                        "Value": "xxxxx-your-alb--vlue.ap-southeast-1.elb.amazonaws.com"
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,228 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  VPCCIDR:
+    Description: CIDR of the VPC
+    Type: String
+  PublicSubnet1CIDR:
+    Description: CIDR of the Public Subnet1
+    Type: String
+  PublicSubnet2CIDR:
+    Description: CIDR of the Public Subnet2
+    Type: String
+  PublicSubnet3CIDR:
+    Description: CIDR of the Public Subnet3
+    Type: String
+  RegionCode:
+    Description: Region Code
+    Type: String
+    AllowedValues:
+      - sgp
+      - syd
+      - tko
+  AZ1Code:
+    Description: AZ1 Code
+    Type: String
+    AllowedValues:
+      - sgpaz1
+      - sydaz1
+      - tkoaz1
+  AZ2Code:
+    Description: AZ2 Code
+    Type: String
+    AllowedValues:
+      - sgpaz2
+      - sydaz2
+      - tkoaz2
+  AZ3Code:
+    Description: AZ3 Code
+    Type: String
+    AllowedValues:
+      - sgpaz3
+      - sydaz3
+      - tkoaz3
+Mappings: 
+  RegionMap: 
+    sgp: 
+      "sgpaz1": "ap-southeast-1a"
+      "sgpaz2": "ap-southeast-1b"
+      "sgpaz3": "ap-southeast-1c"
+    syd: 
+      "sydaz1": "ap-southeast-2a"
+      "sydaz2": "ap-southeast-2b"
+      "sydaz3": "ap-southeast-2c"
+    tko: 
+      "tkoaz1": "ap-northeast-1a"
+      "tkoaz2": "ap-northeast-1c"
+      "tkoaz3": "ap-northeast-1d"
+Resources:
+  MasterVPC:
+    Type: AWS::EC2::VPC
+    Properties: 
+      CidrBlock:
+        !Ref VPCCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: 'default'
+      Tags: 
+        - Key: 'Name'
+          Value: 
+            !Join
+              - '-'
+              - - !Ref AWS::Region
+                - 'vpc'
+  vpcpublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone:
+        !FindInMap [RegionMap, !Ref RegionCode, !Ref AZ1Code] 
+      CidrBlock:
+        !Ref PublicSubnet1CIDR
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - Key: 'Name'
+          Value:
+            !Join
+              - '-'
+              - - 'vpc'
+                - !FindInMap [RegionMap, !Ref RegionCode, !Ref AZ1Code]
+                - 'subnet'
+      VpcId:
+        !Ref MasterVPC
+  vpcpublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone:
+        !FindInMap [RegionMap, !Ref RegionCode, !Ref AZ2Code]
+      CidrBlock:
+        !Ref PublicSubnet2CIDR
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - Key: 'Name'
+          Value:
+            !Join
+              - '-'
+              - - 'vpc'
+                - !FindInMap [RegionMap, !Ref RegionCode, !Ref AZ2Code]
+                - 'subnet'
+      VpcId:
+        !Ref MasterVPC
+  vpcpublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties: 
+      AvailabilityZone:
+        !FindInMap [RegionMap, !Ref RegionCode, !Ref AZ3Code]
+      CidrBlock:
+        !Ref PublicSubnet3CIDR
+      MapPublicIpOnLaunch: true
+      Tags: 
+        - Key: 'Name'
+          Value:
+            !Join
+              - '-'
+              - - 'vpc'
+                - !FindInMap [RegionMap, !Ref RegionCode, !Ref AZ3Code]
+                - 'subnet'
+      VpcId:
+        !Ref MasterVPC
+  masterVPCrouteTableForPublicSubnets:
+    Type: AWS::EC2::RouteTable
+    Properties: 
+      Tags: 
+        - Key: 'Name'
+          Value:
+            !Join
+              - '-'
+              - - 'vpc'
+                - !Ref AWS::Region
+                - 'publicsubnets'
+                - 'rt'
+      VpcId:
+        !Ref MasterVPC
+  # Associate publicSubnet1 to RouteTable
+  publicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        !Ref vpcpublicSubnet1
+      RouteTableId:
+        !Ref masterVPCrouteTableForPublicSubnets
+  # Associate publicSubnet1 to RouteTable
+  publicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        !Ref vpcpublicSubnet2
+      RouteTableId:
+        !Ref masterVPCrouteTableForPublicSubnets
+  # Associate publicSubnet1 to RouteTable
+  publicSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        !Ref vpcpublicSubnet3
+      RouteTableId:
+        !Ref masterVPCrouteTableForPublicSubnets
+  vpcIGW:
+    Type: AWS::EC2::InternetGateway
+    Properties: 
+      Tags: 
+        - Key: 'Name'
+          Value: 'vpc igw'
+  attachVPCAndIGW:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: 
+      InternetGatewayId:
+        !Ref vpcIGW
+      VpcId:
+        !Ref MasterVPC
+  defaultRouteToIGW:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId:
+        !Ref vpcIGW
+      RouteTableId:
+        !Ref masterVPCrouteTableForPublicSubnets
+Outputs:
+  MasterVPCID: #logicalID
+    Description: 'gritworks Master vpc ID'
+    Value:
+      !Ref MasterVPC # the vaule of export is here
+    Export:
+      Name:
+        !Sub ${AWS::StackName}-VPCID # the name of infra-stack export
+  vpcCIDR: #logicalID
+    Description: 'gritworks Master vpc CIDR'
+    Value:
+      !GetAtt MasterVPC.CidrBlock # the vaule of export is here
+    Export:
+      Name:
+        !Sub ${AWS::StackName}-vpcCIDR # the name of infra-stack export
+  vpcpublicSubnet1ID: #logicalID
+    Description: 'gritworks Master vpc publicSubnet1 ID'
+    Value:
+      !Ref vpcpublicSubnet1 # the vaule of export is here
+    Export:
+      Name:
+        !Sub ${AWS::StackName}-publicSubnet1ID # the name of infra-stack export
+  vpcpublicSubnet2ID: #logicalID
+    Description: 'gritworks Master VPC publicSubnet2 ID'
+    Value:
+      !Ref vpcpublicSubnet2 # the vaule of export is here
+    Export:
+      Name:
+        !Sub ${AWS::StackName}-publicSubnet2ID # the name of infra-stack export
+  vpcpublicSubnet3ID: #logicalID
+    Description: 'gritworks Master VPC publicSubnet3 ID'
+    Value:
+      !Ref vpcpublicSubnet3 # the vaule of export is here
+    Export:
+      Name:
+        !Sub ${AWS::StackName}-publicSubnet3ID # the name of infra-stack export
+  masterVPCrouteTableForPublicSubnets: #logicalID
+    Description: 'gritworks routeTable ID'
+    Value:
+      !Ref masterVPCrouteTableForPublicSubnets # the vaule of export is here
+    Export:
+      Name:
+        !Sub ${AWS::StackName}-routeTableID # the name of infra-stack export

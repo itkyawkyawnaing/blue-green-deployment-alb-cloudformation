@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  vpcStackName: #ParameterKey
+    Description: 'Name of your vpc CFN Stack'
+    Type: String
+    Default: 'sgpvpc'
+    AllowedValues:
+      - sgpvpc
+      - sydvpc
+      - tkovpc
+  vpcSecurityGroupStackName: #ParameterKey
+    Description: 'Name of your vpc Security Group CFN Stack'
+    Type: String
+  appVersion:
+    Description: app Version
+    Type: String
+    AllowedValues:
+      - v1
+      - v2
+Resources: 
+  publicInstance: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: ami-0d058fe428540cd89 #ubuntu 20.04 LTS
+      InstanceType: t2.micro
+      SubnetId:
+        Fn::ImportValue:
+          !Sub ${vpcStackName}-publicSubnet1ID
+      KeyName: your-key-name
+      Tags: 
+        - Key: "Name"
+          Value:
+            !Join
+              - '-'
+              - - 'instance'
+                - !Ref appVersion
+      SecurityGroupIds:
+        - !ImportValue
+            Fn::Sub: ${vpcSecurityGroupStackName}-vpcSecurityGroupID
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          sudo apt-get update -y
+          sudo apt-get install nginx -y
+          sudo chmod 666 /var/www/html/index.html
+          sudo echo "<html><h1 align='center'><p style='color:green'>Congratulation Congratulation Aung La Nsang (The Buemese Python) - app v2</p></h1></html>" > /var/www/html/index.html
+Outputs:
+  publicInstanceDNS:
+    Description: DNS Name of Public Instance
+    Value: !GetAtt publicInstance.PublicDnsName
+    Export:
+      Name: !Sub ${AWS::StackName}-publicInstance2DNS # the name of infra-stack export
+  publicInstance2ID:
+    Description: DNS Name of Public Instance
+    Value: !Ref publicInstance
+    Export:
+      Name: !Sub ${AWS::StackName}-publicInstance2ID # the name of infra-stack export  
