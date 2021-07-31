@@ -22,40 +22,34 @@ git clone https://github.com/itkyawkyawnaing/blue-green-deployment-alb-cloudform
 ```
 This will clone my git repository to your local directory.
 
-## 1. Create VPC with AWS CloudFormation template "vpc.yaml"
+## 2. Create VPC with AWS CloudFormation template "vpc.yaml"
 
 ```bash
 aws cloudformation create-stack --stack-name sgpvpc --template-body file://vpc.yaml --parameters ParameterKey='VPCCIDR',ParameterValue='192.168.0.0/16' ParameterKey='PublicSubnet1CIDR',ParameterValue='192.168.1.0/24' ParameterKey='PublicSubnet2CIDR',ParameterValue='192.168.2.0/24' ParameterKey='PublicSubnet3CIDR',ParameterValue='192.168.3.0/24' ParameterKey='RegionCode',ParameterValue='sgp' ParameterKey='AZ1Code',ParameterValue='sgpaz1' ParameterKey='AZ2Code',ParameterValue='sgpaz2' ParameterKey='AZ3Code',ParameterValue='sgpaz3'
 ```
-## 2. Create Security Group with AWS CloudFormation template "vpc-securitygroup.yaml"
+## 3. Create Security Group with AWS CloudFormation template "vpc-securitygroup.yaml"
 ```bash
 aws cloudformation create-stack --stack-name sgvpc-securitygroup --template-body file://vpc-securitygroup.yaml --parameters ParameterKey='vpcStackName',ParameterValue='sgpvpc'
 ```
-## 3. Create Instancev1 with AWS CloudFormation template "instance-v1.yaml"
+## 4. Create Instancev1 with AWS CloudFormation template "instance-v1.yaml"
 ```bash
 aws cloudformation create-stack --stack-name instancev1 --template-body file://public-instance-v1.yaml --parameters ParameterKey='vpcStackName',ParameterValue='sgpvpc' ParameterKey='vpcSecurityGroupStackName',ParameterValue='sgvpc-securitygroup' ParameterKey='appVersion',ParameterValue='v1'
 ```
-## 4. Create Instancev2 with AWS CloudFormation template "instance-v2.yaml"
+## 5. Create Instancev2 with AWS CloudFormation template "instance-v2.yaml"
 ```bash
 aws cloudformation create-stack --stack-name instancev2 --template-body file://public-instance-v2.yaml --parameters ParameterKey='vpcStackName',ParameterValue='sgpvpc' ParameterKey='vpcSecurityGroupStackName',ParameterValue='sgvpc-securitygroup' ParameterKey='appVersion',ParameterValue='v1'
 ```
-## 5. Create Application LoadBalancer with AWS CloudFormation template "alb.yaml"
+## 6. Create Application LoadBalancer with AWS CloudFormation template "alb.yaml"
 ```bash
 aws cloudformation create-stack --stack-name sgpalb --template-body file://alb.yaml
 ```
-## 6. Update Rout53 using "alb.json"
+## 7. Update Rout53 using "alb.json"
 Make sure you must update your "Name" and "value" 
 ```bash
 aws route53 change-resource-record-sets --hosted-zone-id <your zone ID> --change-batch file://alb.json
 ```
 
-# Reference
-<https://aws.amazon.com/premiumsupport/knowledge-center/simple-resource-record-route53-cli/>
-<https://aws.amazon.com/premiumsupport/knowledge-center/alias-resource-record-set-route53-cli/>
-<https://docs.aws.amazon.com/cli/latest/reference/elbv2/register-targets.html>
-<https://docs.aws.amazon.com/cli/latest/reference/elbv2/deregister-targets.html>
-
-# Verification
+## 8. Verification
 
 ```bash
  while sleep 0.9; do curl -k "your domain name"; done
@@ -78,3 +72,9 @@ The output should be load balanced
 <html><h1 align='center'><p style='color:green'> Congratulation Aung La Nsang (The Buemese Python)- app v2</p></h1></html>
 <html><h1 align='center'><p style='color:green'> Congratulation Aung La Nsang (The Buemese Python)- app v2</p></h1></html>
 ```
+
+### Reference
+<https://aws.amazon.com/premiumsupport/knowledge-center/simple-resource-record-route53-cli/>
+<https://aws.amazon.com/premiumsupport/knowledge-center/alias-resource-record-set-route53-cli/>
+<https://docs.aws.amazon.com/cli/latest/reference/elbv2/register-targets.html>
+<https://docs.aws.amazon.com/cli/latest/reference/elbv2/deregister-targets.html>
