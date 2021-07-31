@@ -55,25 +55,3 @@ aws route53 change-resource-record-sets --hosted-zone-id <your zone ID> --change
 <https://aws.amazon.com/premiumsupport/knowledge-center/alias-resource-record-set-route53-cli/>
 <https://docs.aws.amazon.com/cli/latest/reference/elbv2/register-targets.html>
 <https://docs.aws.amazon.com/cli/latest/reference/elbv2/deregister-targets.html>
-
-# aws elbv2
-aws elbv2 register-targets
---target-group-arn <value>
---targets <value>
-[--cli-input-json <value>]
-[--generate-cli-skeleton <value>]
-
-# register v1 instance
-aws elbv2 register-targets --target-group-arn arn:aws:elasticloadbalancing:ap-southeast-1:179284309646:targetgroup/gritworks-target-group/355334befddafc96 --targets Id=i-0b4794a1df108ab73
-
-# register v2 instance
-aws elbv2 register-targets --target-group-arn arn:aws:elasticloadbalancing:ap-southeast-1:179284309646:targetgroup/gritworks-target-group/355334befddafc96 --targets Id=i-0c344db7c82dfd24e
-
-# deregister v1 instance
-aws elbv2 deregister-targets --target-group-arn arn:aws:elasticloadbalancing:ap-southeast-1:179284309646:targetgroup/public-instances-target-group/cc5c47cbb99c4355 --targets Id=i-06a64a0b92ecb3cd5
-
-# deregister v2 instance
-aws elbv2 deregister-targets --target-group-arn arn:aws:elasticloadbalancing:ap-southeast-1:179284309646:targetgroup/gritworks-target-group/355334befddafc96 --targets Id=i-0c344db7c82dfd24e
-
-
-aws route53 change-resource-record-sets --hosted-zone-id Z04738222OBQTWN5AE2J --change-batch file://alb.json
