@@ -49,9 +49,32 @@ Make sure you must update your "Name" and "value"
 aws route53 change-resource-record-sets --hosted-zone-id <your zone ID> --change-batch file://alb.json
 ```
 
-
 # Reference
 <https://aws.amazon.com/premiumsupport/knowledge-center/simple-resource-record-route53-cli/>
 <https://aws.amazon.com/premiumsupport/knowledge-center/alias-resource-record-set-route53-cli/>
 <https://docs.aws.amazon.com/cli/latest/reference/elbv2/register-targets.html>
 <https://docs.aws.amazon.com/cli/latest/reference/elbv2/deregister-targets.html>
+
+# Verification
+
+```bash
+ while sleep 0.9; do curl -k "your domain name"; done
+```
+The output should be load balanced
+```bash
+<html><h1 align='center'><p style='color:green'> Congratulation Aung La Nsang (The Buemese Python)- app v2</p></h1></html>
+<html><h1 align='center'><p style='color:blue'> Congratulation Aung La Nsang (The Buemese Python)- app v1</p></h1></html>
+<html><h1 align='center'><p style='color:green'> Congratulation Aung La Nsang (The Buemese Python)- app v2</p></h1></html>
+<html><h1 align='center'><p style='color:blue'> Congratulation Aung La Nsang (The Buemese Python)- app v1</p></h1></html>
+<html><h1 align='center'><p style='color:blue'> Congratulation Aung La Nsang (The Buemese Python)- app v1</p></h1></html>
+<html><h1 align='center'><p style='color:green'> Congratulation Aung La Nsang (The Buemese Python)- app v2</p></h1></html>
+<html><h1 align='center'><p style='color:blue'> Congratulation Aung La Nsang (The Buemese Python)- app v1</p></h1></html>
+<html><h1 align='center'><p style='color:green'> Congratulation Aung La Nsang (The Buemese Python)- app v2</p></h1></html>
+<html><h1 align='center'><p style='color:blue'> Congratulation Aung La Nsang (The Buemese Python)- app v1</p></h1></html>
+<html><h1 align='center'><p style='color:green'> Congratulation Aung La Nsang (The Buemese Python)- app v2</p></h1></html>
+<html><h1 align='center'><p style='color:green'> Congratulation Aung La Nsang (The Buemese Python)- app v2</p></h1></html>
+<html><h1 align='center'><p style='color:blue'> Congratulation Aung La Nsang (The Buemese Python)- app v1</p></h1></html>
+<html><h1 align='center'><p style='color:blue'> Congratulation Aung La Nsang (The Buemese Python)- app v1</p></h1></html>
+<html><h1 align='center'><p style='color:green'> Congratulation Aung La Nsang (The Buemese Python)- app v2</p></h1></html>
+<html><h1 align='center'><p style='color:green'> Congratulation Aung La Nsang (The Buemese Python)- app v2</p></h1></html>
+```
